@@ -1,13 +1,13 @@
-# <project-name>
+# linux-xmonad
 
-Elevator pitch.
+`xmonad` dotfiles.
 
 ## Install
 
 ```bash
-git clone --depth 1 <URL>
-cd <project-name>
-# make check
+git clone --depth 1 https://github.com/dpopchev/linux-xmonad
+cd linux-xmonad
+make install
 ```
 
 If more context is needed:
@@ -24,8 +24,6 @@ Start with `Setup` subsection for configuration.
 Break intu sub-...subsections using scenario/feature names.
 
 ## Acknowledgment
-
-- [makeareadme](https://www.makeareadme.com/)
 
 ## License
 
