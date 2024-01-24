@@ -58,28 +58,27 @@ clean-stampdir:
 	@$(call del_gitignore,$(stamp_dir))
 
 src_dir := src
-tests_dir := tests
-build_dir := build
 
-$(src_dir) $(tests_dir):
+$(src_dir):
 	@mkdir -p $@
 
-$(build_dir):
-	@mkdir -p $@
-	@$(call add_gitignore,$@/)
+xmonad_src := $(src_dir)/xmonad
+xmonad_dst := ${HOME}/.xmonad
+xmonad_stamp := $(stamp_dir)/xmonad.stamp
+
+.PHONY: xmonad
+xmonad: $(xmonad_stamp)
+
+$(xmonad_stamp): | $(stamp_dir)
+	@$(call log,'install $@')
+
 
 .PHONY: build-object ### recipe building object
 build-object: build/build.o
 
-build/build.o: | $(build_dir)
+build/build.o:
 	@touch $@
 	@$(call log,'built object: $(notdir $@)',$(done))
-
-.PHONY: clean-build ###
-clean-build:
-	@rm -rf $(build_dir)
-	@$(call del_gitignore,$(build_dir))
-	@$(call log,'$@',$(done))
 
 .PHONY: build-stamped ### recipe using stamp idiom
 build-stamped: $(stamp_dir)/stamped.stamp
