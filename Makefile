@@ -93,7 +93,7 @@ uninstall: $(uninstall_dotfiles)
 
 .PHONY: $(uninstall_dotfiles)
 $(uninstall_dotfiles): uninstall-%:
-	# TODO wip for logic; force commiting
+	# TODO WIP for logic; force commiting
 	@if [ !- e $(filter %$*,$(config_stamps)) ]; then \
 		$(call log,'dotfile installation was not registered',$(fail))
 	fi
