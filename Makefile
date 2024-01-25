@@ -70,12 +70,16 @@ src_dir := src
 $(src_dir):
 	@mkdir -p $@
 
-xmonad_src := $(src_dir)/xmonad
-xmonad_dst := ${HOME}/.xmonad
-xmonad_stamp := $(stamp_dir)/xmonad.stamp
+configs += xmonad
+config_dsts += $(addprefix ${HOME}/,$(configs))
+config_stamps += $(addprefix $(stamp_dir)/,$(addsuffix .stamp,$(configs)))
+install_configs += $(addprefix install-,$(configs))
 
-.PHONY: xmonad
-xmonad: $(xmonad_stamp)
+.PHONY: install
+install: $(install_configs)
+
+.PHONY: $(install_configs)
+
 
 $(xmonad_stamp): | $(stamp_dir)
 	@$(call log,'install $@')
