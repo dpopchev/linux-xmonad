@@ -46,6 +46,14 @@ if [ -e .gitignore ]; then \
 	fi
 endef
 
+backup_suffix := dpopchevbak
+define backup_config
+	if [ -e "$(1)" ]; then \
+		mv --force --no-target-directory --backup=numbered \
+		"$(1)" "$(1).$(backup_suffix)";\
+	fi
+endef
+
 stamp_dir := .stamps
 
 $(stamp_dir):
