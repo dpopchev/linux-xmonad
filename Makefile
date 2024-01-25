@@ -48,10 +48,10 @@ endef
 
 backup_suffix := dpopchevbak
 define backup_config
-	if [ -e "$(1)" ]; then \
-		mv --force --no-target-directory --backup=numbered \
-		"$(1)" "$(1).$(backup_suffix)";\
-	fi
+if [ -e "$(1)" ]; then \
+	mv --force --no-target-directory --backup=numbered \
+	"$(1)" "$(1).$(backup_suffix)";\
+fi
 endef
 
 stamp_dir := .stamps
@@ -60,7 +60,7 @@ $(stamp_dir):
 	@$(call add_gitignore,$@)
 	@mkdir -p $@
 
-.PHONY: clean-stampdir
+.PHONY: clean-stampdir ### reset operation tracking
 clean-stampdir:
 	@rm -rf $(stamp_dir)
 	@$(call del_gitignore,$(stamp_dir))
@@ -70,54 +70,43 @@ src_dir := src
 $(src_dir):
 	@mkdir -p $@
 
-configs += xmonad
-config_dsts += $(addprefix ${HOME}/,$(configs))
-config_stamps += $(addprefix $(stamp_dir)/,$(addsuffix .stamp,$(configs)))
-install_configs += $(addprefix install-,$(configs))
+dotfiles += xmonad
+config_dsts += $(addprefix ${HOME}/.,$(dotfiles))
+config_stamps += $(addprefix $(stamp_dir)/,$(addsuffix .stamp,$(dotfiles)))
+install_dotfiles += $(addprefix install-,$(dotfiles))
+uninstall_dotfiles += $(subst install,uninstall,$(install_dotfiles))
 
-.PHONY: install
-install: $(install_configs)
+.PHONY: install ###
+install: $(install_dotfiles)
 
-.PHONY: $(install_configs)
+.PHONY: $(install_dotfiles)
+$(install_dotfiles): install-%: $(stamp_dir)/%.stamp
 
-
-$(xmonad_stamp): | $(stamp_dir)
-	@$(call log,'install $@')
-
-
-.PHONY: build-object ### recipe building object
-build-object: build/build.o
-
-build/build.o:
+$(config_stamps): $(stamp_dir)/%.stamp: | $(stamp_dir)
+	@$(call backup_config,$(filter %$*,$(config_dsts)))
+	@ln -s $(realpath $(src_dir)/$(filter %$*,$(dotfiles))) $(filter %$*,$(config_dsts))
 	@touch $@
-	@$(call log,'built object: $(notdir $@)',$(done))
+	@$(call log,'install dotfile $*',$(done))
 
-.PHONY: build-stamped ### recipe using stamp idiom
-build-stamped: $(stamp_dir)/stamped.stamp
+.PHONY: uninstall ###
+uninstall: $(uninstall_dotfiles)
 
-$(stamp_dir)/stamped.stamp: | $(stamp_dir)
-	@touch $@
-	@$(call log,'making a build using stamp idiom',$(done))
-
-.PHONY: recipe ### recipe depending on stamped built
-recipe:
-	@if [ ! -e $(stamp_dir)/stamped.stamp ]; then \
-		echo 'Required build-stamped recipe not executed yet';\
-		echo 'do: make build-stamped first';\
-		false;\
+.PHONY: $(uninstall_dotfiles)
+$(uninstall_dotfiles): uninstall-%:
+	# TODO wip for logic; force commiting
+	@if [ !- e $(filter %$*,$(config_stamps)) ]; then \
+		$(call log,'dotfile installation was not registered',$(fail))
 	fi
-	@$(call log,'recipe execution',$(done))
-
-module ?= module
-args ?= ''
-.PHONY: run ### run <module>, pass <args>
-run:
-ifeq ($(module),module)
-	@echo 'run with $(module) using $(args)'
-else
-	@echo 'run with $(module) using $(args)'
-endif
+	@if [ -e $(filter %$*,$(config_dsts)).$(backup_suffix) ]; then \
+		mv --force $(filter %$*,$(config_dsts)).$(backup_suffix) $(filter %$*,$(config_dsts));\
+		$(call log,'dotfile restored',$(done))
+	fi
+	@if [ ! -e $(filter %$*,$(config_dsts)) ]; then \
+		$(call log,'restore config $*; inspect localtion manually',$(fail));\
+	fi
+	@rm --force $(filter %$*,$(config_dsts))
+	@rm --force $(stamp_dir)/$*.stamp
 
 .PHONY: clean ###
-clean: clean-build
+clean:
 	@rm -rf $(stamp_dir)
