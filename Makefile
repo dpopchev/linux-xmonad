@@ -93,19 +93,21 @@ $(config_stamps): $(stamp_dir)/%.stamp: | $(stamp_dir)
 uninstall: $(uninstall_dotfiles)
 
 .PHONY: $(uninstall_dotfiles)
+# TODO WIP for logic; force commiting
 $(uninstall_dotfiles): uninstall-%:
-	# TODO WIP for logic; force commiting
-	@if [ !- e $(filter %$*,$(config_stamps)) ]; then \
-		$(call log,'dotfile installation was not registered',$(fail))
-	fi
-	@if [ -e $(filter %$*,$(config_dsts)).$(backup_suffix) ]; then \
-		mv --force $(filter %$*,$(config_dsts)).$(backup_suffix) $(filter %$*,$(config_dsts));\
-		$(call log,'dotfile restored',$(done))
-	fi
-	@if [ ! -e $(filter %$*,$(config_dsts)) ]; then \
-		$(call log,'restore config $*; inspect localtion manually',$(fail));\
+	@if [ ! -e "$(filter %$*,$(config_stamps))" ]; then \
+		$(call log,'$* dotfile isntallation not tracked by this repo instance',$(failstr));\
+		exit 2;\
 	fi
 	@rm --force $(filter %$*,$(config_dsts))
+	$(call log,'$* dotfile removed',$(infostr))
+	@if [ ! -e "$(filter %$*,$(config_dsts)).$(backup_suffix)" ]; then \
+		$(call log,'$* dotfile backup not found',$(warnstr)); \
+	fi
+	@if [ -e "$(filter %$*,$(config_dsts)).$(backup_suffix)" ]; then \
+		mv --force $(filter %$*,$(config_dsts)).$(backup_suffix) $(filter %$*,$(config_dsts));\
+		$(call log,'$* dotfile restored',$(donestr))
+	fi
 	@rm --force $(stamp_dir)/$*.stamp
 
 .PHONY: clean ###
