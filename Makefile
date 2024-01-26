@@ -20,9 +20,10 @@ inspect-%: FORCE
 # standard status messages to be used for logging;
 # length is fixed to 4 charters
 TERM ?=
-done := done
-fail := fail
-info := info
+donestr := done
+failstr := fail
+infostr := info
+warnstr := warn
 
 # justify stdout log message using terminal screen size, if available
 # otherwise use predefined values
@@ -86,7 +87,7 @@ $(config_stamps): $(stamp_dir)/%.stamp: | $(stamp_dir)
 	@$(call backup_config,$(filter %$*,$(config_dsts)))
 	@ln -s $(realpath $(src_dir)/$(filter %$*,$(dotfiles))) $(filter %$*,$(config_dsts))
 	@touch $@
-	@$(call log,'install dotfile $*',$(done))
+	@$(call log,'install dotfile $*',$(donestr))
 
 .PHONY: uninstall ###
 uninstall: $(uninstall_dotfiles)
