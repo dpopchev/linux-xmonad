@@ -13,7 +13,7 @@ myTerminal = "alacritty"
 myFocusFollowsMouse = False :: Bool
 
 -- Whether clicking on a window to focus also passes the click to the window
-myClickJustFocuses = False :: Bool
+myClickJustFocuses = True :: Bool
 
 -- Width of the window border in pixels.
 myBorderWidth = 5
@@ -31,7 +31,13 @@ myModMask = mod4Mask
 --
 -- A tagging example:
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
-myWorkspaces    = ["1","2","3","4","5","6","7","8","9","0"]
+-- TODO WIP
+-- myExtraWorkspaces = [(xK_0, "0"),]
+myWorkspaces = [
+    "1","2","3","4","5","6","7","8","9","0"
+    ]
+    -- ++ (map snd myExtraWorkspaces)
+
 
 -- Border colors for unfocused and focused windows, respectively.
 myNormalBorderColor  = "#dddddd"
@@ -76,32 +82,27 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- Swap the focused window with the previous window
     , ((modm .|. shiftMask, xK_k), windows W.swapUp)
 
-    -- Shrink the master area
-    -- , ((modm, xK_h), sendMessage Shrink)
-
-    -- Expand the master area
-    -- , ((modm, xK_l), sendMessage Expand)
+    -- Shrink/Expand the master area
+    , ((modm .|. shiftMask, xK_l), sendMessage Shrink)
+    , ((modm, xK_l), sendMessage Expand)
 
     -- Push window back into tiling
     , ((modm, xK_t), withFocused $ windows . W.sink)
 
-    -- Increment the number of windows in the master area
+    -- Increment/Deincrement the number of windows in the master area
     , ((modm, xK_comma), sendMessage (IncMasterN 1))
-
-    -- Deincrement the number of windows in the master area
     , ((modm, xK_period), sendMessage (IncMasterN (-1)))
 
     -- Toggle the status bar gap
     -- Use this binding with avoidStruts from Hooks.ManageDocks.
     -- See also the statusBar function from Hooks.DynamicLog.
-    --
     -- , ((modm              , xK_b     ), sendMessage ToggleStruts)
 
     -- Quit xmonad
     , ((modm .|. shiftMask, xK_e), io (exitWith ExitSuccess))
 
     -- Restart xmonad
-    , ((modm .|. shiftMask, xK_r), spawn "xmonad --recompile; xmonad --restart")
+    , ((modm .|. shiftMask, xK_c), spawn "xmonad --recompile; xmonad --restart")
 
     -- Run xmessage with a summary of the default keybindings (useful for beginners)
     , ((modm .|. shiftMask, xK_slash ), xmessage help)
