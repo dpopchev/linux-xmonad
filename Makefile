@@ -55,6 +55,7 @@ if [ -e "$(1)" ]; then \
 fi
 endef
 
+stamp_suffix := stamp
 stamp_dir := .stamps
 
 $(stamp_dir):
@@ -73,7 +74,7 @@ $(src_dir):
 
 dotfiles += xmonad
 config_dsts += $(addprefix ${HOME}/.,$(dotfiles))
-config_stamps += $(addprefix $(stamp_dir)/,$(addsuffix .stamp,$(dotfiles)))
+config_stamps += $(addprefix $(stamp_dir)/,$(addsuffix .$(stamp_suffix),$(dotfiles)))
 install_dotfiles += $(addprefix install-,$(dotfiles))
 uninstall_dotfiles += $(subst install,uninstall,$(install_dotfiles))
 
@@ -81,9 +82,9 @@ uninstall_dotfiles += $(subst install,uninstall,$(install_dotfiles))
 install: $(install_dotfiles)
 
 .PHONY: $(install_dotfiles)
-$(install_dotfiles): install-%: $(stamp_dir)/%.stamp
+$(install_dotfiles): install-%: $(stamp_dir)/%.$(stamp_suffix)
 
-$(config_stamps): $(stamp_dir)/%.stamp: | $(stamp_dir)
+$(config_stamps): $(stamp_dir)/%.$(stamp_suffix): | $(stamp_dir)
 	@$(call backup_config,$(filter %$*,$(config_dsts)))
 	@ln -s $(realpath $(src_dir)/$(filter %$*,$(dotfiles))) $(filter %$*,$(config_dsts))
 	@touch $@
@@ -93,22 +94,21 @@ $(config_stamps): $(stamp_dir)/%.stamp: | $(stamp_dir)
 uninstall: $(uninstall_dotfiles)
 
 .PHONY: $(uninstall_dotfiles)
-# TODO WIP for logic; force commiting
 $(uninstall_dotfiles): uninstall-%:
-	@if [ ! -e "$(filter %$*,$(config_stamps))" ]; then \
+	@if [ ! -e "$(filter %$*.$(stamp_suffix),$(config_stamps))" ]; then \
 		$(call log,'$* dotfile isntallation not tracked by this repo instance',$(failstr));\
 		exit 2;\
 	fi
 	@rm --force $(filter %$*,$(config_dsts))
-	$(call log,'$* dotfile removed',$(infostr))
+	@$(call log,'$* dotfile removed',$(donestr))
 	@if [ ! -e "$(filter %$*,$(config_dsts)).$(backup_suffix)" ]; then \
 		$(call log,'$* dotfile backup not found',$(warnstr)); \
 	fi
 	@if [ -e "$(filter %$*,$(config_dsts)).$(backup_suffix)" ]; then \
 		mv --force $(filter %$*,$(config_dsts)).$(backup_suffix) $(filter %$*,$(config_dsts));\
-		$(call log,'$* dotfile restored',$(donestr))
+		$(call log,'$* dotfile restored',$(donestr));\
 	fi
-	@rm --force $(stamp_dir)/$*.stamp
+	@rm --force $(stamp_dir)/$*.$(stamp_suffix)
 
 .PHONY: clean ###
 clean:
