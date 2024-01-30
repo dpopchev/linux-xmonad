@@ -133,7 +133,7 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
     ]
 
-myLayouts = toggleLayouts (smartBorders Full) (tiled)
+myLayouts = toggleLayouts (Full) (tiled)
   where
      -- default tiling algorithm partitions the screen into two panes
      tiled = Tall nmaster delta ratio
