@@ -57,15 +57,6 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- close focused window
     , ((modm .|. shiftMask, xK_q), kill)
 
-     -- Rotate through the available layout algorithms
-    , ((modm, xK_space), sendMessage NextLayout)
-
-    --  Reset the layouts on the current workspace to default
-    , ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
-
-    -- Resize viewed windows to the correct size
-    , ((modm, xK_equal), refresh)
-
     -- Move focus to the next/previous/master window
     , ((modm, xK_j), windows W.focusDown)
     , ((modm, xK_k), windows W.focusUp)
@@ -195,7 +186,6 @@ myStartupHook = return ()
 -- Now run xmonad with all the defaults we set up.
 
 -- Run xmonad with the settings you specify. No need to modify this.
---
 main = xmonad defaults
 
 -- A structure containing your configuration settings, overriding
