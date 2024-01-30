@@ -99,8 +99,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- Quit/Recompile/Restart xmonad
     , ((modm .|. shiftMask, xK_e), io (exitWith ExitSuccess))
-    , ((modm .|. shiftMask, xK_c), spawn "xmonad --recompile")
-    , ((modm .|. shiftMask, xK_r), spawn "xmonad --restart")
+    , ((modm .|. shiftMask, xK_c), spawn "notify-send 'Compile started'; xmonad --recompile; notify-send \"Compile finished with $?\"")
+    , ((modm .|. shiftMask, xK_r), spawn "notify-send 'Restart xmonad'; xmonad --restart")
     ]
     -- mod-[1..9], Switch to workspace N
     -- mod-shift-[1..9], Move client to workspace N
