@@ -31,15 +31,8 @@ myModMask = mod4Mask
 -- By default we use numeric strings, but any string may be used as a
 -- workspace name. The number of workspaces is determined by the length
 -- of this list.
---
--- A tagging example:
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
--- TODO WIP
--- myExtraWorkspaces = [(xK_0, "0"),]
-myWorkspaces = [
-    "1","2","3","4","5","6","7","8","9","0"
-    ]
-    -- ++ (map snd myExtraWorkspaces)
+myWorkspaces = zip ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] [xK_0..xK_9] :: [(String, KeySym)]
 
 -- Border colors for unfocused and focused windows, respectively.
 myFocusedBorderColor = "#EE4E34"
@@ -91,13 +84,13 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- Quit/Recompile/Restart xmonad
     , ((modm .|. shiftMask, xK_e), io (exitWith ExitSuccess))
     , ((modm .|. shiftMask, xK_c), spawn "notify-send 'Compile started'; xmonad --recompile; notify-send \"Compile finished with $?\"")
-    , ((modm .|. shiftMask, xK_r), spawn "notify-send 'Restart xmonad'; xmonad --restart")
+    , ((modm .|. shiftMask, xK_r), spawn "xmonad --restart; notify-send 'Restart xmonad'")
     ]
     -- mod-[1..9], Switch to workspace N
     -- mod-shift-[1..9], Move client to workspace N
     ++
     [((m .|. modm, k), windows $ f i)
-        | (i, k) <- zip (XMonad.workspaces conf) [xK_1 .. xK_9]
+        | (i, k) <- zip (XMonad.workspaces conf) (map snd myWorkspaces)
         , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]]
     -- mod-{w,e,r}, Switch to physical/Xinerama screens 1, 2, or 3
     -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
@@ -201,7 +194,7 @@ defaults = def {
         clickJustFocuses   = myClickJustFocuses,
         borderWidth        = myBorderWidth,
         modMask            = myModMask,
-        workspaces         = myWorkspaces,
+        workspaces         = (map fst myWorkspaces),
         normalBorderColor  = myNormalBorderColor,
         focusedBorderColor = myFocusedBorderColor,
 
