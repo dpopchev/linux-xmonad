@@ -1,12 +1,14 @@
 import Data.Monoid
 import System.Exit
+import Data.List (unwords)
 
 import XMonad
 import XMonad.Layout.NoBorders (smartBorders)
 import XMonad.Layout.ToggleLayouts (ToggleLayout(..), toggleLayouts)
 import XMonad.Config.Desktop (desktopLayoutModifiers)
+
 import qualified XMonad.StackSet as W
-import qualified Data.Map        as M
+import qualified Data.Map as M
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
@@ -35,8 +37,10 @@ myModMask = mod4Mask
 myWorkspaces = zip ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] [xK_0..xK_9] :: [(String, KeySym)]
 
 -- Border colors for unfocused and focused windows, respectively.
-myFocusedBorderColor = "#EE4E34"
-myNormalBorderColor  = "#FCEDDA"
+myFocusedBorderColor = "#EE4E34" :: String
+myNormalBorderColor  = "#FCEDDA" :: String
+myIntprp = "bash" :: String
+myScripts = "~/.xmonad/scripts" :: String
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -46,6 +50,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- launch dmenu
     , ((modm, xK_d), spawn "dmenu_run")
+    -- , ((modm .|. shiftMask, xK_d), spawn $ unwords [$myIntprp, $myScripts/dmenu_tools.sh])
 
     -- close focused window
     , ((modm .|. shiftMask, xK_q), kill)
