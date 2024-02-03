@@ -1,6 +1,6 @@
 import Data.Monoid
 import System.Exit
-import Data.List (unwords)
+import Data.List (unwords, intercalate)
 
 import XMonad
 import XMonad.Layout.NoBorders (smartBorders)
@@ -42,6 +42,9 @@ myNormalBorderColor  = "#FCEDDA" :: String
 myIntprp = "bash" :: String
 myScripts = "~/.xmonad/scripts" :: String
 
+make_myscript_path :: String -> String
+make_myscript_path name = intercalate "/" [myScripts, name]
+
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
 myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
@@ -50,7 +53,7 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- launch dmenu
     , ((modm, xK_d), spawn "dmenu_run")
-    -- , ((modm .|. shiftMask, xK_d), spawn $ unwords [$myIntprp, $myScripts/dmenu_tools.sh])
+    , ((modm .|. shiftMask, xK_d), spawn $ unwords [myIntprp, make_myscript_path "dmenu_tools.sh"])
 
     -- close focused window
     , ((modm .|. shiftMask, xK_q), kill)
