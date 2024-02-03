@@ -39,11 +39,23 @@ myWorkspaces = zip ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] [xK_0..xK_
 -- Border colors for unfocused and focused windows, respectively.
 myFocusedBorderColor = "#EE4E34" :: String
 myNormalBorderColor  = "#FCEDDA" :: String
-myIntprp = "bash" :: String
-myScripts = "~/.xmonad/scripts" :: String
 
-make_myscript_path :: String -> String
-make_myscript_path name = intercalate "/" [myScripts, name]
+myIntrpr = "bash" :: String
+myScripts = "~/.xmonad/scripts" :: String
+myMainMonitor = "eDP-1" :: String
+myVolumeStep = 5 :: Int
+myQuickVolumeIncrease = 100 :: Int
+myQuickVolumeDecrease = 50 :: Int
+myBrightnessStep = 5 :: Int
+myQuickBrightnessIncrease = 100 :: Int
+myQuickBrightnessDecrease = 50 :: Int
+
+join_with_factory ::  String -> String -> (String -> String)
+join_with_factory sep root = (\name -> intercalate sep [root, name])
+join_with_myscripts :: String -> String
+join_with_myscripts = join_with_factory "/" myScripts
+join_with_intrpr :: String -> String
+join_with_intrpr = join_with_factory " " myIntrpr
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -51,9 +63,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- launch a terminal
     [ ((modm, xK_Return), spawn $ XMonad.terminal conf)
 
+    , ((modm, xK_BackSpace), spawn "xset s activate")
     -- launch dmenu
     , ((modm, xK_d), spawn "dmenu_run")
-    , ((modm .|. shiftMask, xK_d), spawn $ unwords [myIntprp, make_myscript_path "dmenu_tools.sh"])
+    , ((modm .|. shiftMask, xK_d), spawn $ join_with_intrpr (join_with_myscripts "dmenu_tools.sh"))
 
     -- close focused window
     , ((modm .|. shiftMask, xK_q), kill)
@@ -91,8 +104,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- Quit/Recompile/Restart xmonad
     , ((modm .|. shiftMask, xK_e), io (exitWith ExitSuccess))
-    , ((modm .|. shiftMask, xK_c), spawn "notify-send 'Compile started'; xmonad --recompile; notify-send \"Compile finished with $?\"")
-    , ((modm .|. shiftMask, xK_r), spawn "xmonad --restart; notify-send 'Restart xmonad'")
+    , ((modm .|. shiftMask, xK_c), spawn "notify-send 'Compiling xmonad'; xmonad --recompile; notify-send \"xmonad compilation finished with $?\"")
+    , ((modm .|. shiftMask, xK_r), spawn "xmonad --restart && notify-send 'xmonad restarted'")
     ]
     -- mod-[1..9], Switch to workspace N
     -- mod-shift-[1..9], Move client to workspace N
