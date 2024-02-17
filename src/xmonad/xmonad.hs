@@ -1,12 +1,14 @@
 import Data.Monoid
 import System.Exit
+import Data.List (unwords, intercalate)
 
 import XMonad
 import XMonad.Layout.NoBorders (smartBorders)
 import XMonad.Layout.ToggleLayouts (ToggleLayout(..), toggleLayouts)
 import XMonad.Config.Desktop (desktopLayoutModifiers)
+
 import qualified XMonad.StackSet as W
-import qualified Data.Map        as M
+import qualified Data.Map as M
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
@@ -19,7 +21,7 @@ myFocusFollowsMouse = False :: Bool
 myClickJustFocuses = True :: Bool
 
 -- Width of the window border in pixels.
-myBorderWidth = 5
+myBorderWidth = 7
 
 -- modMask lets you specify which modkey you want to use. The default
 -- is mod1Mask ("left alt").  You may also consider using mod3Mask
@@ -31,19 +33,29 @@ myModMask = mod4Mask
 -- By default we use numeric strings, but any string may be used as a
 -- workspace name. The number of workspaces is determined by the length
 -- of this list.
---
--- A tagging example:
 -- > workspaces = ["web", "irc", "code" ] ++ map show [4..9]
--- TODO WIP
--- myExtraWorkspaces = [(xK_0, "0"),]
-myWorkspaces = [
-    "1","2","3","4","5","6","7","8","9","0"
-    ]
-    -- ++ (map snd myExtraWorkspaces)
+myWorkspaces = zip ["0", "1", "2", "3", "4", "5", "6", "7", "8", "9"] [xK_0..xK_9] :: [(String, KeySym)]
 
 -- Border colors for unfocused and focused windows, respectively.
-myNormalBorderColor  = "#dddddd"
-myFocusedBorderColor = "#ff0000"
+myFocusedBorderColor = "#EE4E34" :: String
+myNormalBorderColor  = "#FCEDDA" :: String
+
+myIntrpr = "bash" :: String
+myScripts = "~/.xmonad/scripts" :: String
+myMainMonitor = "eDP-1" :: String
+myVolumeStep = 5 :: Int
+myQuickVolumeIncrease = 100 :: Int
+myQuickVolumeDecrease = 50 :: Int
+myBrightnessStep = 5 :: Int
+myQuickBrightnessIncrease = 100 :: Int
+myQuickBrightnessDecrease = 50 :: Int
+
+join_with_factory ::  String -> String -> (String -> String)
+join_with_factory sep root = (\name -> intercalate sep [root, name])
+join_with_myscripts :: String -> String
+join_with_myscripts = join_with_factory "/" myScripts
+join_with_intrpr :: String -> String
+join_with_intrpr = join_with_factory " " myIntrpr
 
 ------------------------------------------------------------------------
 -- Key bindings. Add, modify or remove key bindings here.
@@ -51,20 +63,13 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- launch a terminal
     [ ((modm, xK_Return), spawn $ XMonad.terminal conf)
 
+    , ((modm, xK_BackSpace), spawn "xset s activate")
     -- launch dmenu
     , ((modm, xK_d), spawn "dmenu_run")
+    , ((modm .|. shiftMask, xK_d), spawn $ join_with_intrpr (join_with_myscripts "dmenu_tools.sh"))
 
     -- close focused window
     , ((modm .|. shiftMask, xK_q), kill)
-
-     -- Rotate through the available layout algorithms
-    , ((modm, xK_space), sendMessage NextLayout)
-
-    --  Reset the layouts on the current workspace to default
-    , ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
-
-    -- Resize viewed windows to the correct size
-    , ((modm, xK_equal), refresh)
 
     -- Move focus to the next/previous/master window
     , ((modm, xK_j), windows W.focusDown)
@@ -99,14 +104,14 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 
     -- Quit/Recompile/Restart xmonad
     , ((modm .|. shiftMask, xK_e), io (exitWith ExitSuccess))
-    , ((modm .|. shiftMask, xK_c), spawn "xmonad --recompile")
-    , ((modm .|. shiftMask, xK_r), spawn "xmonad --restart")
+    , ((modm .|. shiftMask, xK_c), spawn "notify-send 'Compiling xmonad'; xmonad --recompile; notify-send \"xmonad compilation finished with $?\"")
+    , ((modm .|. shiftMask, xK_r), spawn "xmonad --restart && notify-send 'xmonad restarted'")
     ]
     -- mod-[1..9], Switch to workspace N
     -- mod-shift-[1..9], Move client to workspace N
     ++
     [((m .|. modm, k), windows $ f i)
-        | (i, k) <- zip (XMonad.workspaces conf) [xK_1 .. xK_9]
+        | (i, k) <- zip (XMonad.workspaces conf) (map snd myWorkspaces)
         , (f, m) <- [(W.greedyView, 0), (W.shift, shiftMask)]]
     -- mod-{w,e,r}, Switch to physical/Xinerama screens 1, 2, or 3
     -- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
@@ -133,7 +138,7 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
     -- you may also bind events to the mouse scroll wheel (button4 and button5)
     ]
 
-myLayouts = toggleLayouts (smartBorders Full) (tiled)
+myLayouts = toggleLayouts (Full) (tiled)
   where
      -- default tiling algorithm partitions the screen into two panes
      tiled = Tall nmaster delta ratio
@@ -195,7 +200,6 @@ myStartupHook = return ()
 -- Now run xmonad with all the defaults we set up.
 
 -- Run xmonad with the settings you specify. No need to modify this.
---
 main = xmonad defaults
 
 -- A structure containing your configuration settings, overriding
@@ -211,7 +215,7 @@ defaults = def {
         clickJustFocuses   = myClickJustFocuses,
         borderWidth        = myBorderWidth,
         modMask            = myModMask,
-        workspaces         = myWorkspaces,
+        workspaces         = (map fst myWorkspaces),
         normalBorderColor  = myNormalBorderColor,
         focusedBorderColor = myFocusedBorderColor,
 
